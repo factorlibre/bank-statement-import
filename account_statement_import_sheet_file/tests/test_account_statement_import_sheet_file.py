@@ -780,3 +780,64 @@ class TestAccountStatementImportSheetFile(common.TransactionCase):
         self.assertEqual(statement.balance_start, 0.0)
         self.assertEqual(statement.balance_end_real, 2291.5)
         self.assertEqual(statement.balance_end, 2291.5)
+
+    def test_eur_journal_usd_foreign(self):
+        statement_map = self.AccountStatementImportSheetMapping.create(
+            {
+                "name": "Test Only - Foreign Currency CSV Mapping",
+                "timestamp_format": "%Y-%m-%d",
+                "debit_value": "refund",
+                "credit_value": "charge",
+                "timestamp_column": "Payout Date",
+                "currency_column": "Presentment Currency",
+                "amount_type": "simple_value",
+                "amount_column": "Presentment Amount",
+                "original_currency_column": "Currency",
+                "original_amount_column": "Amount",
+                "description_column": "Checkout",
+                "reference_column": "Order",
+                "float_thousands_sep": "none",
+                "float_decimal_sep": "dot",
+            }
+        )
+        bank_journal_eur = self.AccountJournal.create(
+            {
+                "name": "Bank eur",
+                "type": "bank",
+                "code": "BNK_eur",
+                "currency_id": self.currency_eur.id,
+                "company_id": self.company.id,
+            }
+        )
+        file_name = "fixtures/statement_eur.csv"
+        file_data = self._data_file(file_name)
+        wizard = (
+            self.env["account.statement.import"]
+            .with_context(journal_id=bank_journal_eur.id)
+            .create(
+                {
+                    "statement_file": file_data,
+                    "statement_filename": "statement.csv",
+                    "sheet_mapping_id": statement_map.id,
+                }
+            )
+        )
+        wizard.with_context(
+            account_statement_import_sheet_file_test=True
+        ).import_file_button()
+        statement = self.env["account.bank.statement"].search(
+            [("journal_id", "=", bank_journal_eur.id)], limit=1
+        )
+        self.assertTrue(statement)
+        self.assertEqual(len(statement.line_ids), 1)
+        line = statement.line_ids
+        move = line.move_id
+        self.assertTrue(move)
+        bank_line = move.line_ids.filtered(
+            lambda line: line.account_id.account_type == "asset_cash"
+        )
+        counterpart_line = move.line_ids - bank_line
+        self.assertEqual(counterpart_line.credit, 100)
+        self.assertEqual(counterpart_line.amount_currency, -95.0)
+        self.assertEqual(bank_line.debit, 100.00)
+        self.assertEqual(bank_line.amount_currency, 95.0)

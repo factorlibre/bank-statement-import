@@ -49,3 +49,8 @@ class AccountStatementImport(models.TransientModel):
                 amount = sum(statement.line_ids.mapped("amount"))
                 statement.balance_end_real = statement.balance_start + amount
         return res
+
+    def import_single_statement(self, single_statement_data, result):
+        return super(
+            AccountStatementImport, self.with_context(from_stmt_import=True)
+        ).import_single_statement(single_statement_data, result)
