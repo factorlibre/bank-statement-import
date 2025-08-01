@@ -1,2 +1,0 @@
-Transaction Date,Type,Order,Card Brand,Card Source,Payout Status,Payout Date,Available On,Amount,Fee,Net,Checkout,Payment Method Name,Presentment Amount,Presentment Currency,Currency,VAT
-2025-05-25 16:15:43 +0200,charge,#35919,visa,online,paid,2025-05-28,2025-05-28,100,5,95,#CHG123,card,95,EUR,USD,0.00
