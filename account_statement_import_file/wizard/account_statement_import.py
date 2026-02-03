@@ -303,6 +303,15 @@ class AccountStatementImport(models.TransientModel):
                     raise UserError(_("Missing payment_ref on a transaction."))
         return stmts_vals
 
+    def _create_bank_statement_line(self, statement_id, stmt_line_vals):
+        absl_obj = self.env["account.bank.statement.line"]
+        stmt_line_vals["statement_id"] = statement_id
+        absl_obj.create(stmt_line_vals)
+
+    def _create_bank_statement_lines(self, statement_id, stmt_lines_vals):
+        for stmt_line_vals in stmt_lines_vals:
+            self._create_bank_statement_line(statement_id, stmt_line_vals)
+
     def _create_bank_statements(self, stmts_vals, result):
         """Create new bank statements from imported values,
         filtering out already imported transactions,
@@ -339,10 +348,14 @@ class AccountStatementImport(models.TransientModel):
                 # Remove values that won't be used to create records
                 st_vals.pop("transactions", None)
                 context = st_vals.pop("creation_context", {})
-                # Create the statement with lines
-                st_vals["line_ids"] = [[0, False, line] for line in st_lines_to_create]
+                # Create the statement without lines
                 statement = abs_obj.with_context(**context).create(st_vals)
-                statement_ids.append(statement.id)
+                statement_id = statement.id
+                statement_ids.append(statement_id)
+                # Create statement lines after statement
+                self.with_context(**context)._create_bank_statement_lines(
+                    statement_id, st_lines_to_create
+                )
 
         if not statement_ids:
             return False
