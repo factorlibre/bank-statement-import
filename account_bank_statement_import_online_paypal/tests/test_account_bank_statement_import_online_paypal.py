@@ -53,7 +53,7 @@ class TestAccountBankAccountStatementImportOnlinePayPal(
     def setUp(self):
         super().setUp()
 
-        self.now = fields.Datetime.now()
+        self.now = fields.Datetime.from_string(fields.Datetime.now())
         self.now_isoformat = self.now.isoformat() + '+0000'
         self.today = datetime(self.now.year, self.now.month, self.now.day)
         self.today_isoformat = self.today.isoformat() + '+0000'
@@ -91,7 +91,7 @@ class TestAccountBankAccountStatementImportOnlinePayPal(
             'name': 'Bank',
             'type': 'bank',
             'code': 'BANK',
-            'currency_id': self.currency_eur.id,
+            'currency_id': self.currency_usd.id,
             'bank_statements_source': 'online',
             'online_bank_statement_provider': 'paypal',
         })
@@ -118,7 +118,7 @@ class TestAccountBankAccountStatementImportOnlinePayPal(
             'name': 'Bank',
             'type': 'bank',
             'code': 'BANK',
-            'currency_id': self.currency_eur.id,
+            'currency_id': self.currency_usd.id,
             'bank_statements_source': 'online',
             'online_bank_statement_provider': 'paypal',
         })
@@ -144,7 +144,7 @@ class TestAccountBankAccountStatementImportOnlinePayPal(
             'name': 'Bank',
             'type': 'bank',
             'code': 'BANK',
-            'currency_id': self.currency_eur.id,
+            'currency_id': self.currency_usd.id,
             'bank_statements_source': 'online',
             'online_bank_statement_provider': 'paypal',
         })
@@ -170,7 +170,7 @@ class TestAccountBankAccountStatementImportOnlinePayPal(
             'name': 'Bank',
             'type': 'bank',
             'code': 'BANK',
-            'currency_id': self.currency_eur.id,
+            'currency_id': self.currency_usd.id,
             'bank_statements_source': 'online',
             'online_bank_statement_provider': 'paypal',
         })
@@ -195,7 +195,7 @@ class TestAccountBankAccountStatementImportOnlinePayPal(
             'name': 'Bank',
             'type': 'bank',
             'code': 'BANK',
-            'currency_id': self.currency_eur.id,
+            'currency_id': self.currency_usd.id,
             'bank_statements_source': 'online',
             'online_bank_statement_provider': 'paypal',
         })
@@ -253,7 +253,7 @@ class TestAccountBankAccountStatementImportOnlinePayPal(
             'name': 'Bank',
             'type': 'bank',
             'code': 'BANK',
-            'currency_id': self.currency_eur.id,
+            'currency_id': self.currency_usd.id,
             'bank_statements_source': 'online',
             'online_bank_statement_provider': 'paypal',
         })
@@ -275,7 +275,7 @@ class TestAccountBankAccountStatementImportOnlinePayPal(
             'name': 'Bank',
             'type': 'bank',
             'code': 'BANK',
-            'currency_id': self.currency_eur.id,
+            'currency_id': self.currency_usd.id,
             'bank_statements_source': 'online',
             'online_bank_statement_provider': 'paypal',
         })
@@ -297,7 +297,7 @@ class TestAccountBankAccountStatementImportOnlinePayPal(
             'name': 'Bank',
             'type': 'bank',
             'code': 'BANK',
-            'currency_id': self.currency_eur.id,
+            'currency_id': self.currency_usd.id,
             'bank_statements_source': 'online',
             'online_bank_statement_provider': 'paypal',
         })
@@ -361,7 +361,7 @@ class TestAccountBankAccountStatementImportOnlinePayPal(
             'name': 'Bank',
             'type': 'bank',
             'code': 'BANK',
-            'currency_id': self.currency_eur.id,
+            'currency_id': self.currency_usd.id,
             'bank_statements_source': 'online',
             'online_bank_statement_provider': 'paypal',
         })
@@ -394,7 +394,7 @@ class TestAccountBankAccountStatementImportOnlinePayPal(
             'name': 'Bank',
             'type': 'bank',
             'code': 'BANK',
-            'currency_id': self.currency_eur.id,
+            'currency_id': self.currency_usd.id,
             'bank_statements_source': 'online',
             'online_bank_statement_provider': 'paypal',
         })

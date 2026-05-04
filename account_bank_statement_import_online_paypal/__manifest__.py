@@ -4,7 +4,7 @@
 
 {
     'name': 'Online Bank Statements: PayPal.com',
-    'version': '12.0.1.1.0',
+    'version': '11.0.1.0.0',
     'author':
         'CorporateHub, '
         'Odoo Community Association (OCA)',

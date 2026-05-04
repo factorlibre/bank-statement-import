@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
@@ -20,7 +20,7 @@ msgid "ACH funding for funds recovery from account balance"
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
-#: model_terms:ir.ui.view,arch_db:account_bank_statement_import_online_paypal.online_bank_statement_provider_form
+#: model:ir.ui.view,arch_db:account_bank_statement_import_online_paypal.online_bank_statement_provider_form
 msgid "API base"
 msgstr ""
 
@@ -157,7 +157,7 @@ msgid "Check withdrawal"
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
-#: model_terms:ir.ui.view,arch_db:account_bank_statement_import_online_paypal.online_bank_statement_provider_form
+#: model:ir.ui.view,arch_db:account_bank_statement_import_online_paypal.online_bank_statement_provider_form
 msgid "Client ID"
 msgstr ""
 
@@ -781,7 +781,7 @@ msgid "Reversal of points usage"
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
-#: model_terms:ir.ui.view,arch_db:account_bank_statement_import_online_paypal.online_bank_statement_provider_form
+#: model:ir.ui.view,arch_db:account_bank_statement_import_online_paypal.online_bank_statement_provider_form
 msgid "Secret"
 msgstr ""
 
