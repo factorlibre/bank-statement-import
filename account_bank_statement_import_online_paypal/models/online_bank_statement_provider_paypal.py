@@ -13,7 +13,7 @@ from urllib.error import HTTPError
 from urllib.parse import urlencode
 import urllib.request
 
-from odoo import models, api, _
+from odoo import fields, models, api, _
 from odoo.exceptions import UserError
 
 
@@ -171,6 +171,15 @@ NO_DATA_FOR_DATE_AVAIL_MSG = 'Data for the given start date is not available.'
 class OnlineBankStatementProviderPayPal(models.Model):
     _inherit = 'online.bank.statement.provider'
 
+    paypal_skip_fees = fields.Boolean(
+        string='Skip Fees',
+        help=(
+            'When enabled, PayPal transaction fee lines are not imported '
+            'into the bank statement. Note that the statement balance may '
+            'not match the PayPal account balance if fees are skipped.'
+        ),
+    )
+
     @api.model
     def _get_available_services(self):
         return super()._get_available_services() + [
@@ -232,6 +241,11 @@ class OnlineBankStatementProviderPayPal(models.Model):
             lambda x: self._paypal_transaction_to_lines(x),
             transactions
         )))
+        if self.paypal_skip_fees:
+            lines = [
+                line for line in lines
+                if not line['unique_import_id'].endswith('-FEE')
+            ]
 
         first_transaction = transactions[0]
         first_transaction_id = \

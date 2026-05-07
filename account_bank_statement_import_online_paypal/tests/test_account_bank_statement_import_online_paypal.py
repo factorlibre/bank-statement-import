@@ -535,6 +535,87 @@ class TestAccountBankAccountStatementImportOnlinePayPal(
         )
         self.assertEqual(data[1], {"balance_start": 0.0, "balance_end_real": 900.0})
 
+    def test_pull_skip_fees(self):
+        journal = self.AccountJournal.create({
+            'name': 'Bank',
+            'type': 'bank',
+            'code': 'BANK',
+            'bank_statements_source': 'online',
+            'online_bank_statement_provider': 'paypal',
+        })
+
+        provider = journal.online_bank_statement_provider_id
+        provider.paypal_skip_fees = True
+        mocked_response = json.loads("""{
+    "transaction_details": [{
+        "transaction_info": {
+            "paypal_account_id": "1234567890",
+            "transaction_id": "1234567890",
+            "transaction_event_code": "T1234",
+            "transaction_initiation_date": "%s",
+            "transaction_updated_date": "%s",
+            "transaction_amount": {
+                "currency_code": "USD",
+                "value": "1000.00"
+            },
+            "fee_amount": {
+                "currency_code": "USD",
+                "value": "-100.00"
+            },
+            "transaction_status": "S",
+            "transaction_subject": "Payment for Invoice(s) 1",
+            "ending_balance": {
+                "currency_code": "USD",
+                "value": "900.00"
+            },
+            "available_balance": {
+                "currency_code": "USD",
+                "value": "900.00"
+            },
+            "invoice_id": "1"
+        },
+        "payer_info": {
+            "account_id": "1234567890",
+            "email_address": "partner@example.com",
+            "address_status": "Y",
+            "payer_status": "N",
+            "payer_name": {
+                "alternate_full_name": "Acme, Inc."
+            },
+            "country_code": "US"
+        },
+        "shipping_info": {},
+        "cart_info": {},
+        "store_info": {},
+        "auction_info": {},
+        "incentive_info": {}
+    }],
+    "account_number": "1234567890",
+    "start_date": "%s",
+    "end_date": "%s",
+    "last_refreshed_datetime": "%s",
+    "page": 1,
+    "total_items": 1,
+    "total_pages": 1
+}""" % (
+            self.yesterday_isoformat,
+            self.yesterday_isoformat,
+            self.yesterday_isoformat,
+            self.today_isoformat,
+            self.now_isoformat,
+        ),
+            parse_float=Decimal,
+            )
+        with mock.patch(
+            _provider_class + '._paypal_retrieve',
+            return_value=mocked_response,
+        ), self.mock_token():
+            data = provider._obtain_statement_data(self.yesterday, self.today,)
+
+        self.assertEqual(len(data[0]), 1)
+        self.assertNotIn('-FEE', data[0][0]['unique_import_id'])
+        self.assertEqual(data[0][0]['amount'], '1000.00')
+
     def test_transaction_parse_1(self):
         lines = self.paypal_parse_transaction("""{
     "transaction_info": {

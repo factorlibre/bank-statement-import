@@ -30,6 +30,7 @@
                             password="True"
                             attrs="{'required': [('service', '=', 'paypal')]}"
                         />
+                        <field name="paypal_skip_fees"/>
                     </group>
                 </group>
             </xpath>

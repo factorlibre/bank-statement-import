@@ -234,20 +234,20 @@ msgid "Electronic funds transfer (EFT)"
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
-#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:370
+#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:384
 #, python-format
 msgid "Failed to acquire token using Client ID and Secret!"
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
-#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:248
-#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:274
+#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:262
+#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:288
 #, python-format
 msgid "Failed to resolve transaction %s (%s)"
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
-#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:344
+#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:358
 #, python-format
 msgid "Fee for %s"
 msgstr ""
@@ -500,13 +500,13 @@ msgid "International credit card withdrawal"
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
-#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:368
+#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:382
 #, python-format
 msgid "Invalid token type!"
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
-#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:310
+#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:324
 #, python-format
 msgid "Invoice %s"
 msgstr ""
@@ -554,7 +554,7 @@ msgid "Mobile payment, made through a mobile phone"
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
-#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:541
+#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:555
 #, python-format
 msgid "No authentication specified!"
 msgstr ""
@@ -589,7 +589,7 @@ msgid "Partner fee"
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
-#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:364
+#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:378
 #, python-format
 msgid "PayPal App features are configured incorrectly!"
 msgstr ""
@@ -607,7 +607,7 @@ msgid "PayPal Here payment"
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
-#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:199
+#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:208
 #, python-format
 msgid "PayPal allows retrieving transactions only up to 3 years in the past. Please import older transactions manually. See https://www.paypal.com/us/smarthelp/article/why-can't-i-access-transaction-history-greater-than-3-years-ts2241"
 msgstr ""
@@ -792,6 +792,11 @@ msgid "Settlement consolidation"
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
+#: model:ir.model.fields,field_description:account_bank_statement_import_online_paypal.field_online_bank_statement_provider_paypal_skip_fees
+msgid "Skip Fees"
+msgstr ""
+
+#. module: account_bank_statement_import_online_paypal
 #: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:40
 #, python-format
 msgid "Store-to-store transfers"
@@ -828,7 +833,7 @@ msgid "Third-party recoupment"
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
-#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:349
+#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:363
 #, python-format
 msgid "Transaction fee for %s"
 msgstr ""
@@ -852,14 +857,14 @@ msgid "Transfer to external GL entity"
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
-#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:557
+#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:571
 #, python-format
 msgid "Unknown authentication specified!"
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
-#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:505
-#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:511
+#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:519
+#: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:525
 #, python-format
 msgid "Unknown error"
 msgstr ""
@@ -904,6 +909,11 @@ msgstr ""
 #: code:addons/account_bank_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:44
 #, python-format
 msgid "Website payments. Pro account monthly fee"
+msgstr ""
+
+#. module: account_bank_statement_import_online_paypal
+#: model:ir.model.fields,help:account_bank_statement_import_online_paypal.field_online_bank_statement_provider_paypal_skip_fees
+msgid "When enabled, PayPal transaction fee lines are not imported into the bank statement. Note that the statement balance may not match the PayPal account balance if fees are skipped."
 msgstr ""
 
 #. module: account_bank_statement_import_online_paypal
