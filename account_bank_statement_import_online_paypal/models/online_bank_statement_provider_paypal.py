@@ -472,7 +472,8 @@ class OnlineBankStatementProviderPayPal(models.Model):
                 )
                 transactions += list(filter(
                     lambda transaction:
-                        interval_start <= self._paypal_get_transaction_date(
+                        transaction is not None
+                        and interval_start <= self._paypal_get_transaction_date(
                             transaction
                         ) < interval_end,
                     interval_transactions
