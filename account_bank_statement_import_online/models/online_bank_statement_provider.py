@@ -229,11 +229,7 @@ class OnlineBankStatementProvider(models.Model):
                 ], limit=1)
                 if not statement:
                     statement_values.update({
-                        'name': provider.journal_id.sequence_id.with_context(
-                            ir_sequence_date=fields.Date.to_string(
-                                statement_date
-                            ),
-                        ).next_by_id(),
+                        'name': provider._get_statement_name(statement_date),
                         'journal_id': provider.journal_id.id,
                         'date': fields.Date.to_string(statement_date),
                     })
@@ -384,6 +380,14 @@ class OnlineBankStatementProvider(models.Model):
         tz = timezone(self.tz) if self.tz else utc
         date_since = date_since.replace(tzinfo=utc).astimezone(tz)
         return date_since.date()
+
+    @api.multi
+    def _get_statement_name(self, statement_date):
+        """Hook for extension. Default behaviour: use the journal's sequence."""
+        self.ensure_one()
+        return self.journal_id.sequence_id.with_context(
+            ir_sequence_date=fields.Date.to_string(statement_date),
+        ).next_by_id()
 
     @api.multi
     def _generate_unique_import_id(self, unique_import_id):

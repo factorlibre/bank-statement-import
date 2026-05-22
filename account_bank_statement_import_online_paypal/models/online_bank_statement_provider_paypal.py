@@ -415,7 +415,7 @@ class OnlineBankStatementProviderPayPal(models.Model):
                 transaction_date,
         )
         data = self._paypal_retrieve(url, token)
-        transactions = data['transaction_details']
+        transactions = data.get('transaction_details', [])
         for transaction in transactions:
             if transaction['transaction_info']['transaction_id'] != \
                     transaction_id:
@@ -468,16 +468,17 @@ class OnlineBankStatementProviderPayPal(models.Model):
                     lambda transaction: self._paypal_preparse_transaction(
                         transaction
                     ),
-                    data['transaction_details']
+                    data.get('transaction_details', [])
                 )
                 transactions += list(filter(
                     lambda transaction:
-                        interval_start <= self._paypal_get_transaction_date(
+                        transaction is not None
+                        and interval_start <= self._paypal_get_transaction_date(
                             transaction
                         ) < interval_end,
                     interval_transactions
                 ))
-                total_pages = data['total_pages']
+                total_pages = data.get('total_pages', 0)
                 page += 1
             interval_start += interval_step
         return transactions
