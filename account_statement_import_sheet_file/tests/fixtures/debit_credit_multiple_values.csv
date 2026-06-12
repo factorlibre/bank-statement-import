@@ -1,0 +1,4 @@
+"Date","Label","Amount","Type","Balance","Partner Name","Bank Account"
+"01/15/2024","Customer payment","200.00","charge","300.00","John Doe","123456789"
+"01/16/2024","Customer refund","50.00","refund","250.00","Jane Doe","987654321"
+"01/17/2024","Chargeback","30.00","dispute","220.00","Acme Corp",""

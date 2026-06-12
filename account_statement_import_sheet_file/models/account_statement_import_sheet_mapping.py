@@ -141,11 +141,15 @@ class AccountStatementImportSheetMapping(models.Model):
         ),
     )
     debit_value = fields.Char(
-        help="Value of debit/credit column that indicates if it's a debit",
+        help="Value of debit/credit column that indicates if it's a debit. "
+        "Several values can be set separated by ';' (case sensitive). "
+        "Any value not listed here is treated as a credit.",
         default="D",
     )
     credit_value = fields.Char(
-        help="Value of debit/credit column that indicates if it's a credit",
+        help="Value of debit/credit column that indicates if it's a credit. "
+        "The sign is derived from the debit values: any value not listed "
+        "as a debit is treated as a credit.",
         default="C",
     )
     transaction_id_column = fields.Char(
