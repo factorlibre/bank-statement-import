@@ -582,13 +582,25 @@ msgstr ""
 
 #. module: account_statement_import_sheet_file
 #: model:ir.model.fields,help:account_statement_import_sheet_file.field_account_statement_import_sheet_mapping__credit_value
-msgid "Value of debit/credit column that indicates if it's a credit"
-msgstr "Valor de la columna de débito/crédito que indica si es un crédito"
+msgid ""
+"Value of debit/credit column that indicates if it's a credit. The sign is "
+"derived from the debit values: any value not listed as a debit is treated as "
+"a credit."
+msgstr ""
+"Valor de la columna de débito/crédito que indica si es un crédito. El signo "
+"se deduce de los valores de débito: cualquier valor no listado como débito se "
+"trata como crédito."
 
 #. module: account_statement_import_sheet_file
 #: model:ir.model.fields,help:account_statement_import_sheet_file.field_account_statement_import_sheet_mapping__debit_value
-msgid "Value of debit/credit column that indicates if it's a debit"
-msgstr "Valor de la columna de débito/crédito que indica si es un débito"
+msgid ""
+"Value of debit/credit column that indicates if it's a debit. Several values "
+"can be set separated by ';' (case sensitive). Any value not listed here is "
+"treated as a credit."
+msgstr ""
+"Valor de la columna de débito/crédito que indica si es un débito. Se pueden "
+"indicar varios valores separados por ';' (distingue mayúsculas/minúsculas). "
+"Cualquier valor no listado aquí se trata como crédito."
 
 #. module: account_statement_import_sheet_file
 #: model:ir.model.fields.selection,name:account_statement_import_sheet_file.selection__account_statement_import_sheet_mapping__file_encoding__iso-8859-1

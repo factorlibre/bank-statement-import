@@ -392,6 +392,90 @@ class TestAccountStatementImportSheetFile(common.TransactionCase):
         self.assertEqual(statement.balance_end_real, 1510.0)
         self.assertEqual(statement.balance_end, 1510.0)
 
+    def test_debit_credit_multiple_values(self):
+        journal = self.AccountJournal.create(
+            {
+                "name": "Bank",
+                "type": "bank",
+                "code": "BANK",
+                "currency_id": self.currency_usd.id,
+                "suspense_account_id": self.suspense_account.id,
+            }
+        )
+        statement_map = self.sample_statement_map.copy(
+            {
+                "balance_column": "Balance",
+                "original_currency_column": None,
+                "original_amount_column": None,
+                "debit_credit_column": "Type",
+                "debit_value": "refund;dispute",
+                "credit_value": "charge",
+            }
+        )
+        data = self._data_file("fixtures/debit_credit_multiple_values.csv", "utf-8")
+        wizard = self.AccountStatementImport.with_context(journal_id=journal.id).create(
+            {
+                "statement_filename": "fixtures/debit_credit_multiple_values.csv",
+                "statement_file": data,
+                "sheet_mapping_id": statement_map.id,
+            }
+        )
+        wizard.with_context(
+            account_statement_import_sheet_file_test=True
+        ).import_file_button()
+        statement = self.AccountBankStatement.search([("journal_id", "=", journal.id)])
+        self.assertEqual(len(statement), 1)
+        self.assertEqual(len(statement.line_ids), 3)
+        # charge -> credit (+200), refund and dispute -> debit (-50, -30)
+        self.assertEqual(
+            sorted(statement.line_ids.mapped("amount")),
+            [-50.0, -30.0, 200.0],
+        )
+        self.assertEqual(statement.balance_start, 100.0)
+        self.assertEqual(statement.balance_end_real, 220.0)
+        self.assertEqual(statement.balance_end, 220.0)
+
+    def test_debit_credit_multiple_values_inverse_sign(self):
+        journal = self.AccountJournal.create(
+            {
+                "name": "Bank",
+                "type": "bank",
+                "code": "BANK",
+                "currency_id": self.currency_usd.id,
+                "suspense_account_id": self.suspense_account.id,
+            }
+        )
+        statement_map = self.sample_statement_map.copy(
+            {
+                "balance_column": "Balance",
+                "original_currency_column": None,
+                "original_amount_column": None,
+                "debit_credit_column": "Type",
+                "debit_value": "refund;dispute",
+                "credit_value": "charge",
+                "amount_inverse_sign": True,
+            }
+        )
+        data = self._data_file("fixtures/debit_credit_multiple_values.csv", "utf-8")
+        wizard = self.AccountStatementImport.with_context(journal_id=journal.id).create(
+            {
+                "statement_filename": "fixtures/debit_credit_multiple_values.csv",
+                "statement_file": data,
+                "sheet_mapping_id": statement_map.id,
+            }
+        )
+        wizard.with_context(
+            account_statement_import_sheet_file_test=True
+        ).import_file_button()
+        statement = self.AccountBankStatement.search([("journal_id", "=", journal.id)])
+        self.assertEqual(len(statement), 1)
+        self.assertEqual(len(statement.line_ids), 3)
+        # With inverse sign: charge -> -200, refund and dispute -> +50, +30
+        self.assertEqual(
+            sorted(statement.line_ids.mapped("amount")),
+            [-200.0, 30.0, 50.0],
+        )
+
     def test_debit_credit_amount(self):
         journal = self.AccountJournal.create(
             {

@@ -540,12 +540,18 @@ msgstr ""
 
 #. module: account_statement_import_sheet_file
 #: model:ir.model.fields,help:account_statement_import_sheet_file.field_account_statement_import_sheet_mapping__credit_value
-msgid "Value of debit/credit column that indicates if it's a credit"
+msgid ""
+"Value of debit/credit column that indicates if it's a credit. The sign is "
+"derived from the debit values: any value not listed as a debit is treated as "
+"a credit."
 msgstr ""
 
 #. module: account_statement_import_sheet_file
 #: model:ir.model.fields,help:account_statement_import_sheet_file.field_account_statement_import_sheet_mapping__debit_value
-msgid "Value of debit/credit column that indicates if it's a debit"
+msgid ""
+"Value of debit/credit column that indicates if it's a debit. Several values "
+"can be set separated by ';' (case sensitive). Any value not listed here is "
+"treated as a credit."
 msgstr ""
 
 #. module: account_statement_import_sheet_file

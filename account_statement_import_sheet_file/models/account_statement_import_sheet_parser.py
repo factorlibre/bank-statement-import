@@ -220,6 +220,11 @@ class AccountStatementImportSheetParser(models.TransientModel):
         else:
             rows = csv_or_xlsx
 
+        debit_values = [
+            value.strip()
+            for value in (mapping.debit_value or "").split(";")
+            if value.strip()
+        ]
         lines = []
         for index, row in enumerate(rows, label_line):
             if isinstance(csv_or_xlsx, tuple):
@@ -333,7 +338,7 @@ class AccountStatementImportSheetParser(models.TransientModel):
 
             if debit_credit is not None:
                 amount = abs(amount)
-                if debit_credit == mapping.debit_value:
+                if debit_credit in debit_values:
                     amount = -amount
 
             if original_amount:
