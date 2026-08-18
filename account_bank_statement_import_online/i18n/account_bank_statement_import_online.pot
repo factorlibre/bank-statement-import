@@ -365,3 +365,63 @@ msgstr ""
 msgid "Weekly statements"
 msgstr ""
 
+#. module: account_bank_statement_import_online
+#: code:addons/account_bank_statement_import_online/models/online_bank_statement_provider.py:511
+#, python-format
+msgid "%s movement(s) could not be imported because the statement of their day is already validated, so nothing was written and nothing was discarded. Reopen the statement and pull again, or enter them by hand.<br/>%s"
+msgstr ""
+
+#. module: account_bank_statement_import_online
+#: code:addons/account_bank_statement_import_online/models/online_bank_statement_provider.py:519
+#, python-format
+msgid "%s: %s movement(s)"
+msgstr ""
+
+#. module: account_bank_statement_import_online
+#: code:addons/account_bank_statement_import_online/models/online_bank_statement_provider.py:463
+#, python-format
+msgid "Failed to obtain statement data for %s period(s) in this run. See server logs for more details.<br/>%s"
+msgstr ""
+
+#. module: account_bank_statement_import_online
+#: code:addons/account_bank_statement_import_online/models/online_bank_statement_provider.py:548
+#, python-format
+msgid "Late lines recovered"
+msgstr ""
+
+#. module: account_bank_statement_import_online
+#: code:addons/account_bank_statement_import_online/models/online_bank_statement_provider.py:523
+#, python-format
+msgid "Movements left out of a validated statement"
+msgstr ""
+
+#. module: account_bank_statement_import_online
+#: model:ir.model.fields,help:account_bank_statement_import_online.field_online_bank_statement_provider_overlap_days
+msgid "Number of days already pulled that every scheduled run requests again.\n"
+"\n"
+"A day is closed with whatever the provider has published by the time the run happens, and is never requested again: anything published afterwards is lost. Re-checking the previous days recovers it, and costs one extra request per day and run.\n"
+"\n"
+"Leave it at 0 for providers that publish without delay."
+msgstr ""
+
+#. module: account_bank_statement_import_online
+#: model:ir.model.fields,field_description:account_bank_statement_import_online.field_online_bank_statement_provider_overlap_days
+msgid "Re-check previous days"
+msgstr ""
+
+#. module: account_bank_statement_import_online
+#: sql_constraint:online.bank.statement.provider:0
+msgid "Re-check previous days must not be negative!"
+msgstr ""
+
+#. module: account_bank_statement_import_online
+#: code:addons/account_bank_statement_import_online/models/online_bank_statement_provider.py:544
+#, python-format
+msgid "Recovered %s line(s) for %s, a statement that was already closed: that day had been imported incomplete."
+msgstr ""
+
+#. module: account_bank_statement_import_online
+#: code:addons/account_bank_statement_import_online/models/online_bank_statement_provider.py:469
+#, python-format
+msgid "Since %s until %s: %s"
+msgstr ""
