@@ -8,6 +8,7 @@ import dateutil.parser
 from decimal import Decimal
 import itertools
 import json
+import logging
 import pytz
 from urllib.error import HTTPError
 from urllib.parse import urlencode
@@ -16,6 +17,7 @@ import urllib.request
 from odoo import fields, models, api, _
 from odoo.exceptions import UserError
 
+_logger = logging.getLogger(__name__)
 
 PAYPAL_API_BASE = 'https://api.paypal.com'
 TRANSACTIONS_SCOPE = 'https://uri.paypal.com/services/reporting/search/read'
@@ -166,6 +168,18 @@ EVENT_DESCRIPTIONS = {
     'T9900': _('Other'),
 }
 NO_DATA_FOR_DATE_AVAIL_MSG = 'Data for the given start date is not available.'
+# PayPal's Transaction Search API only covers the previous three years.
+# _obtain_statement_data refuses older ranges outright.
+# https://developer.paypal.com/docs/api/transaction-search/v1/
+PAYPAL_RETENTION = relativedelta(years=3)
+# How recent a window start has to be for "data not available for the given
+# start date" to mean "not consolidated yet" rather than a fault. PayPal
+# support confirmed the behaviour for Monday after UTC midnight (case
+# 06650320, see ROADMAP.rst), and it shows up on any weekday for a provider
+# whose day is cut in its own timezone. Further back than this the data should
+# be there, so the error is raised instead of closing the day at zero: a run
+# must not leave "no transactions" and "could not read them" looking alike.
+PAYPAL_CONSOLIDATION_LAG = relativedelta(hours=8)
 
 
 class OnlineBankStatementProviderPayPal(models.Model):
@@ -204,7 +218,7 @@ class OnlineBankStatementProviderPayPal(models.Model):
         if date_until.tzinfo:
             date_until = date_until.astimezone(pytz.utc).replace(tzinfo=None)
 
-        if date_since < datetime.utcnow() - relativedelta(years=3):
+        if date_since < datetime.utcnow() - PAYPAL_RETENTION:
             raise UserError(_(
                 'PayPal allows retrieving transactions only up to 3 years in '
                 'the past. Please import older transactions manually. See '
@@ -453,12 +467,16 @@ class OnlineBankStatementProviderPayPal(models.Model):
                         page,
                     ))
 
-                # NOTE: Workaround for INVALID_REQUEST (see ROADMAP.rst)
+                # NOTE: Workaround for INVALID_REQUEST (see ROADMAP.rst).
+                # Tolerated for a window PayPal may not have consolidated yet,
+                # whatever the weekday: the check also demanded a Monday, so
+                # the scheduled run lost its current window every other day of
+                # the week. Older starts than that keep raising -- see
+                # PAYPAL_CONSOLIDATION_LAG.
                 invalid_data_workaround = self.env.context.get(
                     'test_account_bank_statement_import_online_paypal_monday',
-                    interval_start.weekday() == 0 and (
-                        datetime.utcnow() - interval_start
-                    ).total_seconds() < 28800
+                    interval_start
+                    >= datetime.utcnow() - PAYPAL_CONSOLIDATION_LAG
                 )
 
                 data = self.with_context(
@@ -540,6 +558,12 @@ class OnlineBankStatementProviderPayPal(models.Model):
             if self.env.context.get('invalid_data_workaround') \
                     and content.get('name') == 'INVALID_REQUEST' \
                     and content.get('message') == NO_DATA_FOR_DATE_AVAIL_MSG:
+                # Not silent on purpose: an empty window is a normal outcome,
+                # but a provider reporting it every single day is not.
+                _logger.info(
+                    'PayPal reported no data available for %s; treating the'
+                    ' window as empty.' % url
+                )
                 return {
                     'transaction_details': [],
                     'page': 1,
