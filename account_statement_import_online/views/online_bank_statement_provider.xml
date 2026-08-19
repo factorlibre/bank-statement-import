@@ -80,6 +80,7 @@
                                 <field name="interval_type" />
                             </div>
                             <field name="next_run" />
+                            <field name="overlap_days" />
                         </group>
                         <group name="configuration" string="Configuration">
                             <field name="statement_creation_mode" />
