@@ -1149,3 +1149,20 @@ msgstr "Pago de subastas en eBay"
 #, python-format
 msgid "eBay loyalty incentive"
 msgstr "Incentivo a la fidelidad en eBay"
+
+#. module: account_statement_import_online_paypal
+#. odoo-python
+#: code:addons/account_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:0
+#, python-format
+msgid "Invalid JSON response from PayPal API."
+msgstr "Respuesta JSON no válida de la API de PayPal."
+
+#. module: account_statement_import_online_paypal
+#. odoo-python
+#: code:addons/account_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:0
+#, python-format
+msgid ""
+"Unexpected response from PayPal for %(url)s: it carries neither transactions"
+" nor any known field of the transaction search endpoint, so it cannot be "
+"taken for a window without transactions."
+msgstr "Respuesta inesperada de PayPal para %(url)s: no trae movimientos ni ningún campo conocido del endpoint de búsqueda de transacciones, así que no puede darse por una ventana sin movimientos."
