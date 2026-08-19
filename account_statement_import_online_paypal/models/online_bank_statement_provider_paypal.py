@@ -4,6 +4,7 @@
 
 import itertools
 import json
+import logging
 import urllib.request
 from base64 import b64encode
 from datetime import datetime
@@ -17,6 +18,8 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import _, api, models
 from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
 
 PAYPAL_API_BASE = "https://api.paypal.com"
 TRANSACTIONS_SCOPE = "https://uri.paypal.com/services/reporting/search/read"
@@ -172,6 +175,28 @@ EVENT_DESCRIPTIONS = {
     "T9900": _("Other"),
 }
 NO_DATA_FOR_DATE_AVAIL_MSG = "Data for the given start date is not available."
+# PayPal's Transaction Search API only covers the previous three years.
+# _obtain_statement_data refuses older ranges outright.
+# https://developer.paypal.com/docs/api/transaction-search/v1/
+PAYPAL_RETENTION = relativedelta(years=3)
+# How recent a window start has to be for "data not available for the given
+# start date" to mean "not consolidated yet" rather than a fault. PayPal
+# support confirmed the behaviour for Monday after UTC midnight (case
+# 06650320, see ROADMAP.rst), and it shows up on any weekday for a provider
+# whose day is cut in its own timezone. Further back than this the data should
+# be there, so the error is raised instead of closing the day at zero: a run
+# must not leave "no transactions" and "could not read them" looking alike.
+PAYPAL_CONSOLIDATION_LAG = relativedelta(hours=8)
+# Fields the Transaction Search endpoint answers with. A payload carrying none
+# of them is not a reply from it, whatever the status code said.
+PAYPAL_TRANSACTIONS_FIELDS = (
+    "transaction_details",
+    "total_items",
+    "total_pages",
+    "page",
+    "account_number",
+    "last_refreshed_datetime",
+)
 
 
 class OnlineBankStatementProviderPayPal(models.Model):
@@ -210,7 +235,7 @@ class OnlineBankStatementProviderPayPal(models.Model):
         if date_until.tzinfo:
             date_until = date_until.astimezone(pytz.utc).replace(tzinfo=None)
 
-        if date_since < datetime.utcnow() - relativedelta(years=3):
+        if date_since < datetime.utcnow() - PAYPAL_RETENTION:
             raise UserError(
                 _(
                     "PayPal allows retrieving transactions only up to 3 years in "
@@ -366,7 +391,7 @@ class OnlineBankStatementProviderPayPal(models.Model):
             self.api_base or PAYPAL_API_BASE
         ) + "/v1/reporting/balances?currency_code={}&as_of_time={}".format(
             currency,
-            as_of_timestamp.isoformat() + "Z",
+            self._paypal_format_datetime(as_of_timestamp),
         )
         data = self._paypal_retrieve(url, token)
         available_balance = data["balances"][0].get("available_balance")
@@ -425,15 +450,20 @@ class OnlineBankStatementProviderPayPal(models.Model):
                 }
                 url = f"{base}/v1/reporting/transactions?{urlencode(params)}"
 
-                # NOTE: Workaround for INVALID_REQUEST (see ROADMAP.rst)
+                # NOTE: Workaround for INVALID_REQUEST (see ROADMAP.rst).
+                # Tolerated for a window PayPal may not have consolidated yet,
+                # whatever the weekday: the check also demanded a Monday, so
+                # the scheduled run lost its current window every other day of
+                # the week. Older starts than that keep raising -- see
+                # PAYPAL_CONSOLIDATION_LAG.
                 invalid_data_workaround = self.env.context.get(
                     "test_account_statement_import_online_paypal_monday",
-                    interval_start.weekday() == 0
-                    and (datetime.utcnow() - interval_start).total_seconds() < 28800,
+                    interval_start >= datetime.utcnow() - PAYPAL_CONSOLIDATION_LAG,
                 )
                 data = self.with_context(
                     invalid_data_workaround=invalid_data_workaround,
                 )._paypal_retrieve(url, token)
+                self._paypal_check_transactions_payload(data, url)
                 transaction_details = data.get("transaction_details") or []
                 interval_transactions = map(
                     lambda transaction: self._paypal_preparse_transaction(transaction),
@@ -456,6 +486,38 @@ class OnlineBankStatementProviderPayPal(models.Model):
                 page += 1
             interval_start += interval_step
         return transactions
+
+    def _paypal_check_transactions_payload(self, data, url):
+        """Tell a window with no transactions from a reply we do not know.
+
+        PayPal leaves `transaction_details` out when the window has nothing,
+        so its absence cannot be treated as a failure. Defaulting it away
+        wholesale is what makes a real failure look like a quiet empty day,
+        which is the objection this arrangement has to answer: accept the
+        absence only when the rest of the payload still looks like an answer
+        from this endpoint, and raise otherwise.
+        """
+        self.ensure_one()
+        if "transaction_details" in data:
+            return
+        if any(field in data for field in PAYPAL_TRANSACTIONS_FIELDS):
+            # Not silent: an empty window is ordinary, a provider reporting one
+            # every single day is not.
+            _logger.info(
+                "PayPal returned no transaction details for %s; "
+                "treating the window as empty.",
+                url,
+            )
+            return
+        raise UserError(
+            _(
+                "Unexpected response from PayPal for %(url)s: it carries "
+                "neither transactions nor any known field of the transaction "
+                "search endpoint, so it cannot be taken for a window without "
+                "transactions."
+            )
+            % {"url": url}
+        )
 
     @api.model
     def _paypal_get_transaction_date(self, transaction):
@@ -520,6 +582,13 @@ class OnlineBankStatementProviderPayPal(models.Model):
                 and content.get("name") == "INVALID_REQUEST"
                 and content.get("message") == NO_DATA_FOR_DATE_AVAIL_MSG
             ):
+                # Not silent on purpose: an empty window is a normal outcome,
+                # but a provider reporting it every single day is not.
+                _logger.info(
+                    "PayPal reported no data available for %s; "
+                    "treating the window as empty.",
+                    url,
+                )
                 return {
                     "transaction_details": [],
                     "page": 1,

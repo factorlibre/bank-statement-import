@@ -9,3 +9,16 @@
   hours after UTC midnight it returns ``INVALID_REQUEST`` incorrectly: their
   servers have not inflated the data yet. PayPal tech support confirmed this
   behaviour in case #06650320 (private).
+
+  The same answer turns up on any weekday, not only on Monday, for a provider
+  whose statement day is cut in its own timezone rather than in UTC: the
+  scheduled run then asks for a window that has only just started. The error is
+  therefore tolerated for any window starting within the last few hours, and
+  that day is imported as empty and completed by a later run, once PayPal has
+  consolidated it.
+
+  It is tolerated only that close to the present. A window starting further
+  back should have been consolidated long ago, so the error is raised and the
+  run reports it instead of closing the day at zero: "there were no
+  transactions" and "the transactions could not be read" must not look alike in
+  a statement.

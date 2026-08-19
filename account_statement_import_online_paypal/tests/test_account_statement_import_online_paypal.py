@@ -277,6 +277,124 @@ class TestAccountBankAccountStatementImportOnlinePayPal(common.TransactionCase):
 
         self.assertEqual(data, ([], {"balance_start": 0.75, "balance_end_real": 0.75}))
 
+    def _no_data_available_response(self):
+        return UrlopenRetValMock(
+            """{
+    "debug_id": "eec890ebd5798",
+    "details": "xxxxxx",
+    "links": "xxxxxx",
+    "message": "Data for the given start date is not available.",
+    "name": "INVALID_REQUEST"
+}""",
+            throw=True,
+        )
+
+    def _balances_response(self):
+        return UrlopenRetValMock(
+            """{
+    "balances": [
+        {
+            "currency": "EUR",
+            "primary": true,
+            "total_balance": {"currency_code": "EUR", "value": "0.75"},
+            "available_balance": {"currency_code": "EUR", "value": "0.75"},
+            "withheld_balance": {"currency_code": "EUR", "value": "0.00"}
+        }
+    ],
+    "account_id": "1234567890",
+    "as_of_time": "%s",
+    "last_refresh_time": "%s"
+}"""
+            % (self.now_isoformat, self.now_isoformat)
+        )
+
+    def _paypal_journal(self):
+        return self.AccountJournal.create(
+            {
+                "name": "Bank",
+                "type": "bank",
+                "code": "BANK",
+                "currency_id": self.currency_eur.id,
+                "bank_statements_source": "online",
+                "online_bank_statement_provider": "paypal",
+            }
+        )
+
+    def test_no_data_on_any_weekday(self):
+        """A window that has only just started is empty, not broken.
+
+        The check also demanded a Monday, on the assumption that windows begin
+        at UTC midnight and a scheduled run never reaches the day in progress.
+        A provider whose day is cut in its own timezone does reach it, every
+        day of the week, and the pull died there six days out of seven.
+        """
+        provider = self._paypal_journal().online_bank_statement_provider_id
+        since = self.now - relativedelta(hours=1)
+        with mock.patch(
+            _provider_class + "._paypal_urlopen",
+            side_effect=[self._no_data_available_response(), self._balances_response()],
+        ), self.mock_token():
+            # No context flag: the default is what has to tolerate it now.
+            data = provider._obtain_statement_data(since, self.now)
+
+        self.assertEqual(data, ([], {"balance_start": 0.75, "balance_end_real": 0.75}))
+
+    def test_no_data_beyond_the_lag_still_raises(self):
+        """Past the consolidation lag the same answer is a fault, not a day.
+
+        A window whose start PayPal has had for a long time should be there.
+        Taking the error for an empty window that far back would close the day
+        at zero and leave no way to tell "no transactions" from "could not read
+        the transactions" -- and the run would move its marker on regardless,
+        because nothing raised.
+
+        Reachable through `_obtain_statement_data` now that the tolerance is
+        bounded in hours: with the bound at the retention range, every start the
+        entry check let through was tolerated, so this branch could only be
+        exercised by calling the request layer directly.
+        """
+        provider = self._paypal_journal().online_bank_statement_provider_id
+        since = self.now - relativedelta(hours=10)
+        with mock.patch(
+            _provider_class + "._paypal_urlopen",
+            # The balances answer is here so that a version that wrongly
+            # tolerates the error gets all the way through and fails on the
+            # exception that never came, instead of on an exhausted mock.
+            side_effect=[self._no_data_available_response(), self._balances_response()],
+        ), self.mock_token():
+            with self.assertRaisesRegex(
+                UserError, "Data for the given start date is not available"
+            ):
+                provider._obtain_statement_data(since, self.now)
+
+    def test_unknown_payload_shape_is_not_taken_for_an_empty_window(self):
+        """A 200 that looks like nothing must not pass as a day without moves.
+
+        Defaulting the missing key away is what would turn a real failure into
+        a quiet empty day, and a day accepted empty is never asked for again.
+        """
+        provider = self._paypal_journal().online_bank_statement_provider_id
+        with mock.patch(
+            _provider_class + "._paypal_retrieve",
+            return_value={"something": "else"},
+        ):
+            with self.assertRaisesRegex(UserError, "Unexpected response from PayPal"):
+                provider._paypal_get_transactions(
+                    "--TOKEN--", "EUR", self.now - relativedelta(hours=1), self.now
+                )
+
+    def test_payload_without_details_but_shaped_like_one_is_an_empty_window(self):
+        """PayPal leaves the key out when the window has nothing to give."""
+        provider = self._paypal_journal().online_bank_statement_provider_id
+        with mock.patch(
+            _provider_class + "._paypal_retrieve",
+            return_value={"account_number": "1234567890", "total_pages": 0},
+        ):
+            transactions = provider._paypal_get_transactions(
+                "--TOKEN--", "EUR", self.now - relativedelta(hours=1), self.now
+            )
+        self.assertEqual(transactions, [])
+
     def test_error_handling_1(self):
         journal = self.AccountJournal.create(
             {
