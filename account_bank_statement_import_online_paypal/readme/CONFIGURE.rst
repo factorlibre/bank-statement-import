@@ -27,3 +27,22 @@ To obtain *Client ID* and *Secret*:
 #. Copy *Client ID* and *Secret* to use during provider configuration
 #. Under *Live App Settings*, uncheck all features except *Transaction Search*
 #. Click Save
+
+Re-checking previous days
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PayPal makes a movement available well after it happened, so the day a
+scheduled run closes is routinely still incomplete, and the difference is lost
+unless the day is requested again. This is the service the *Re-check previous
+days* field of the provider exists for.
+
+The field is 0 out of the box, here as everywhere else, so it has to be set
+deliberately: the value belongs to the installation, which is the only place
+where the schedule, the timezone and the accounting lock dates are known.
+Three days covered every delay observed in the instances measured.
+
+Mind the cost before raising it, because PayPal is usually configured as one
+provider per currency and all of them are pulled in the same run: each period
+costs three or four requests, so the requests per run grow with the overlap
+and with the number of providers at the same time. The base module explains
+that and the rest of what to weigh.

@@ -248,6 +248,102 @@ class TestAccountBankAccountStatementImportOnlinePayPal(
             'balance_end_real': 0.75,
         }))
 
+    def _no_data_provider(self):
+        journal = self.AccountJournal.create({
+            'name': 'Bank',
+            'type': 'bank',
+            'code': 'BANK',
+            'currency_id': self.currency_usd.id,
+            'bank_statements_source': 'online',
+            'online_bank_statement_provider': 'paypal',
+        })
+        return journal.online_bank_statement_provider_id
+
+    def _no_data_response(self):
+        return UrlopenRetValMock("""{
+    "debug_id": "eec890ebd5798",
+    "details": "xxxxxx",
+    "links": "xxxxxx",
+    "message": "Data for the given start date is not available.",
+    "name": "INVALID_REQUEST"
+}""", throw=True)
+
+    def _balance_response(self):
+        return UrlopenRetValMock("""{
+    "balances": [
+        {
+            "currency": "EUR",
+            "primary": true,
+            "total_balance": {
+                "currency_code": "EUR",
+                "value": "0.75"
+            },
+            "available_balance": {
+                "currency_code": "EUR",
+                "value": "0.75"
+            },
+            "withheld_balance": {
+                "currency_code": "EUR",
+                "value": "0.00"
+            }
+        }
+    ],
+    "account_id": "1234567890",
+    "as_of_time": "%s",
+    "last_refresh_time": "%s"
+}""" % (self.now_isoformat, self.now_isoformat,))
+
+    def test_no_data_on_any_weekday(self):
+        """A window that has only just started is empty, not broken.
+
+        The check also demanded a Monday, on the assumption that windows begin
+        at UTC midnight and a scheduled run never reaches the day in progress.
+        A provider whose day is cut in its own timezone does reach it, every
+        day of the week, and the pull died there six days out of seven.
+        """
+        provider = self._no_data_provider()
+        with mock.patch(
+            _provider_class + '._paypal_urlopen',
+            side_effect=[self._no_data_response(), self._balance_response()],
+        ), self.mock_token():
+            # No context flag: the default is what has to tolerate it now.
+            data = provider._obtain_statement_data(
+                self.now - relativedelta(hours=1),
+                self.now,
+            )
+
+        self.assertEqual(data, ([], {
+            'balance_start': 0.75,
+            'balance_end_real': 0.75,
+        }))
+
+    def test_no_data_beyond_the_lag_still_raises(self):
+        """Past the consolidation lag the same answer is a fault, not a day.
+
+        A window whose start PayPal has had for a long time should be there.
+        Taking the error for an empty window that far back would close the day
+        at zero and leave no way to tell "no transactions" from "could not read
+        the transactions" -- and the run would move its marker on regardless,
+        because nothing raised.
+        """
+        provider = self._no_data_provider()
+        with mock.patch(
+            _provider_class + '._paypal_urlopen',
+            # The balance answer is here so that a version that wrongly
+            # tolerates the error gets all the way through and fails on the
+            # exception that never came, instead of on an exhausted mock.
+            side_effect=[self._no_data_response(), self._balance_response()],
+        ), self.mock_token():
+            with self.assertRaises(UserError) as caught:
+                provider._obtain_statement_data(
+                    self.now - relativedelta(hours=10),
+                    self.now,
+                )
+        self.assertIn(
+            'INVALID_REQUEST: Data for the given start date is not available.',
+            str(caught.exception),
+        )
+
     def test_error_handling_1(self):
         journal = self.AccountJournal.create({
             'name': 'Bank',
