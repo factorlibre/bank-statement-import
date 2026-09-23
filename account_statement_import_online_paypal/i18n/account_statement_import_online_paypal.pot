@@ -1131,3 +1131,21 @@ msgstr ""
 #, python-format
 msgid "eBay loyalty incentive"
 msgstr ""
+
+
+#. module: account_statement_import_online_paypal
+#. odoo-python
+#: code:addons/account_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:0
+#, python-format
+msgid "Invalid JSON response from PayPal API."
+msgstr ""
+
+#. module: account_statement_import_online_paypal
+#. odoo-python
+#: code:addons/account_statement_import_online_paypal/models/online_bank_statement_provider_paypal.py:0
+#, python-format
+msgid ""
+"Unexpected response from PayPal for %(url)s: it carries neither transactions"
+" nor any known field of the transaction search endpoint, so it cannot be "
+"taken for a window without transactions."
+msgstr ""

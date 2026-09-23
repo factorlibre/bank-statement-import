@@ -577,6 +577,107 @@ msgstr ""
 msgid "Week(s)"
 msgstr "Semana(s)"
 
+#. module: account_statement_import_online
+#. odoo-python
+#: code:addons/account_statement_import_online/models/online_bank_statement_provider.py:0
+#, python-format
+msgid ""
+"Failed to obtain statement data for {count} period(s) in this run. See "
+"server logs for more details.<br/>{detail}"
+msgstr "No se han podido obtener los datos del extracto de {count} periodo(s) en esta pasada. Consulte el registro del servidor para más detalles.<br/>{detail}"
+
+#. module: account_statement_import_online
+#. odoo-python
+#: code:addons/account_statement_import_online/models/online_bank_statement_provider.py:0
+#, python-format
+msgid "Issue with Online Bank Statement Provider"
+msgstr "Incidencia en el proveedor de extractos bancarios online"
+
+#. module: account_statement_import_online
+#. odoo-python
+#: code:addons/account_statement_import_online/models/online_bank_statement_provider.py:0
+#, python-format
+msgid "Late lines recovered"
+msgstr "Líneas tardías recuperadas"
+
+#. module: account_statement_import_online
+#: model:ir.model.fields,help:account_statement_import_online.field_online_bank_statement_provider__overlap_days
+msgid ""
+"Number of days already pulled that every scheduled run requests again.\n"
+"\n"
+"A day is closed with whatever the provider has published by the time the run happens, and is never requested again: anything published afterwards is lost. Re-checking the previous days recovers it, and costs one extra request per day and run.\n"
+"\n"
+"Leave it at 0 for providers that publish without delay."
+msgstr ""
+"Número de días ya descargados que cada pasada planificada vuelve a pedir.\n"
+"\n"
+"Un día se cierra con lo que el proveedor haya publicado en el momento de la pasada, y no se vuelve a pedir nunca: lo que se publique después se pierde. Volver a comprobar los días anteriores lo recupera, y cuesta una petición más por cada día y pasada.\n"
+"\n"
+"Déjelo a 0 para proveedores que publican sin retraso."
+
+#. module: account_statement_import_online
+#: model:ir.model.fields,field_description:account_statement_import_online.field_online_bank_statement_provider__overlap_days
+msgid "Re-check previous days"
+msgstr "Volver a comprobar días anteriores"
+
+#. module: account_statement_import_online
+#: model:ir.model.constraint,message:account_statement_import_online.constraint_online_bank_statement_provider_valid_overlap_days
+msgid "Re-check previous days must not be negative!"
+msgstr "¡Volver a comprobar días anteriores no puede ser negativo!"
+
+#. module: account_statement_import_online
+#. odoo-python
+#: code:addons/account_statement_import_online/models/online_bank_statement_provider.py:0
+#, python-format
+msgid ""
+"Re-importing {period} rewrote its {detail}. The period had been closed "
+"incomplete, so what the provider reports is what is kept."
+msgstr "Al reimportar {period} se han reescrito sus {detail}. El periodo se había cerrado incompleto, así que se conserva lo que informa el proveedor."
+
+#. module: account_statement_import_online
+#. odoo-python
+#: code:addons/account_statement_import_online/models/online_bank_statement_provider.py:0
+#, python-format
+msgid ""
+"Recovered {count} line(s) for {period}, which had already been imported: it "
+"was closed incomplete."
+msgstr "Se han recuperado {count} línea(s) de {period}, que ya se había importado: se cerró incompleto."
+
+#. module: account_statement_import_online
+#. odoo-python
+#: code:addons/account_statement_import_online/models/online_bank_statement_provider.py:0
+#, python-format
+msgid "Since {since} until {until}: {exception}"
+msgstr "Desde {since} hasta {until}: {exception}"
+
+#. module: account_statement_import_online
+#. odoo-python
+#: code:addons/account_statement_import_online/models/online_bank_statement_provider.py:0
+#, python-format
+msgid "Statement balances rewritten"
+msgstr "Saldos del extracto reescritos"
+
+#. module: account_statement_import_online
+#. odoo-python
+#: code:addons/account_statement_import_online/models/online_bank_statement_provider.py:0
+#, python-format
+msgid "ending balance"
+msgstr "saldo final"
+
+#. module: account_statement_import_online
+#. odoo-python
+#: code:addons/account_statement_import_online/models/online_bank_statement_provider.py:0
+#, python-format
+msgid "starting balance"
+msgstr "saldo inicial"
+
+#. module: account_statement_import_online
+#. odoo-python
+#: code:addons/account_statement_import_online/models/online_bank_statement_provider.py:0
+#, python-format
+msgid "{label} from {before} to {after}"
+msgstr "{label} de {before} a {after}"
+
 #~ msgid "Daily statements"
 #~ msgstr "Extractos Diariamente"
 
