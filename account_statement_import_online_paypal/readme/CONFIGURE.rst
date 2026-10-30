@@ -36,3 +36,22 @@ and *Secret* obtained above:
 NOTE: For development and testing purposes, you can create Sandbox credentials associated with your *PayPal
 for Business* account. When configuring the provider-specific settings, enter the following in the *API base* field:
 https://api.sandbox.paypal.com
+
+Re-checking previous days
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PayPal makes a movement available well after it happened, so the day a
+scheduled run closes is routinely still incomplete, and the difference is lost
+unless the day is requested again. This is the service the *Re-check previous
+days* field of the provider exists for.
+
+The field is 0 out of the box, here as everywhere else, so it has to be set
+deliberately: the value belongs to the installation, which is the only place
+where the schedule, the timezone and the accounting lock dates are known. Three
+days covered every delay observed in the instances measured, and each extra day
+costs one more period per run.
+
+Two things worth knowing before settling on a value, both explained in the base
+module: the requests grow with the overlap, and a period that has been closed
+for accounting has its recovered lines dated into the first open one instead of
+being refused.
